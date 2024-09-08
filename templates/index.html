@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Categorization Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #1d1d41; /* Dark background for dashboard */
+            color: white;
+        }
+        .card {
+            background-color: #2d2d60; /* Darker card background */
+            color: white;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .stat-panel {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        table {
+            background-color: #2d2d60;
+        }
+        .table th, .table td {
+            color: white;
+        }
+        .chart-container {
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .btn-primary {
+            background-color: #1E90FF;
+            border-color: #1E90FF;
+        }
+        .btn-primary:hover {
+            background-color: #1C86EE;
+            border-color: #1C86EE;
+        }
+        .chartjs-size-monitor {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Email Categorization Dashboard</h1>
+
+        <!-- Fetch Emails Button -->
+        <div class="text-center mb-4">
+            <button id="fetchEmails" class="btn btn-primary">Fetch Emails</button>
+            <!-- Button to navigate to Tickets Page -->
+            <a href="/tickets" class="btn btn-secondary ml-2">View Tickets</a>
+        </div>
+
+        <!-- Dynamic Stats Panels Row -->
+        <div id="statsPanelRow" class="row text-center">
+            <!-- Stat panels will be dynamically generated here -->
+        </div>
+
+        <!-- Chart Row -->
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card p-4">
+                    <h5 class="text-center">Email Categories Breakdown</h5>
+                    <div class="chart-container">
+                        <canvas id="categoryBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email List Table -->
+        <div class="row mt-4 justify-content-center">
+            <div class="col-md-10">
+                <div class="card p-4">
+                    <h5 class="text-center">Recent Emails (Click a category to filter)</h5>
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Snippet</th>
+                                <th>Category</th>
+                            </tr>
+                        </thead>
+                        <tbody id="emailTable">
+                            <!-- Email rows will be inserted here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let categorizedEmails = [];
+
+        document.getElementById('fetchEmails').addEventListener('click', function() {
+            fetch('/emails')
+                .then(response => response.json())
+                .then(data => {
+                    categorizedEmails = data.emails;
+                    const categoryCounts = data.category_counts;
+
+                    // Dynamically generate stats panels
+                    const statsPanelRow = document.getElementById('statsPanelRow');
+                    statsPanelRow.innerHTML = ''; // Clear previous panels
+                    Object.keys(categoryCounts).forEach(category => {
+                        const count = categoryCounts[category];
+                        const panelHTML = `
+                            <div class="col-md-4 mb-3">
+                                <div class="card p-4">
+                                    <h5>${category} Emails</h5>
+                                    <p class="stat-panel">${count}</p>
+                                </div>
+                            </div>`;
+                        statsPanelRow.innerHTML += panelHTML;
+                    });
+
+                    // Prepare category data for chart
+                    const categories = Object.keys(categoryCounts);
+                    const counts = Object.values(categoryCounts);
+                    const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']; // Add more colors as needed
+
+                    // Update Bar Chart
+                    const barChartCtx = document.getElementById('categoryBarChart').getContext('2d');
+                    const barChart = new Chart(barChartCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: categories,
+                            datasets: [{
+                                label: '# of Emails',
+                                data: counts,
+                                backgroundColor: colors.slice(0, categories.length), // Use dynamic colors
+                                borderColor: colors.slice(0, categories.length),
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            },
+                            onClick: function(evt, item) {
+                                if (item.length > 0) {
+                                    const categoryIndex = item[0].index;
+                                    const selectedCategory = categories[categoryIndex];
+                                    displayEmailsForCategory(selectedCategory);
+                                }
+                            }
+                        }
+                    });
+
+                    // Initial load of all emails in the table
+                    displayEmailsForCategory();
+                })
+                .catch(error => {
+                    console.error('Error fetching emails:', error);
+                });
+        });
+
+        // Function to display emails for a selected category (or all if no category is selected)
+        function displayEmailsForCategory(category = null) {
+            const emailTable = document.getElementById('emailTable');
+            emailTable.innerHTML = ''; // Clear previous content
+
+            const filteredEmails = category 
+                ? categorizedEmails.filter(email => email.category === category)
+                : categorizedEmails;
+
+            filteredEmails.forEach(email => {
+                const row = `<tr>
+                    <td>${email.subject}</td>
+                    <td>${email.snippet}</td>
+                    <td>${email.category}</td>
+                </tr>`;
+                emailTable.innerHTML += row;
+            });
+        }
+    </script>
+</body>
+</html>

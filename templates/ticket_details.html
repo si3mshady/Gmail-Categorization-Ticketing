@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Details</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #1d1d41;
+            color: white;
+        }
+        .card {
+            background-color: #2d2d60;
+            color: white;
+            border-radius: 10px;
+        }
+        h1, h5 {
+            color: #fff;
+        }
+        .btn-primary {
+            background-color: #1E90FF;
+            border-color: #1E90FF;
+        }
+        .btn-back {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="text-center mb-4">
+            <h1>Ticket Details</h1>
+        </div>
+
+        <div class="card p-4">
+            <h5><strong>Subject:</strong> {{ ticket[1] }}</h5>
+            <p><strong>Snippet:</strong> {{ ticket[2] }}</p>
+            <p><strong>Status:</strong> {{ ticket[3] }}</p>
+            <p><strong>Category:</strong> {{ ticket[4] }}</p>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/tickets" class="btn btn-primary btn-back">Back to Tickets</a>  <!-- Button to go back to tickets -->
+        </div>
+    </div>
+</body>
+</html>

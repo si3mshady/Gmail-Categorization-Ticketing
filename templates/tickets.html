@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Tickets</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #1d1d41;
+            color: white;
+        }
+        .card {
+            background-color: #2d2d60;
+            color: white;
+            border-radius: 10px;
+        }
+        table {
+            background-color: #2d2d60;
+        }
+        .table th, .table td {
+            color: white;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Security Tickets</h1>
+
+        <!-- Back to Home Button -->
+        <div class="text-center mb-4">
+            <a href="/" class="btn btn-primary">Back to Home</a>
+        </div>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Subject</th>
+                    <th>Snippet</th>
+                    <th>Status</th>
+                    <th>Category</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket[0] }}</td>
+                    <td><a href="/ticket/{{ ticket[0] }}" class="text-white">{{ ticket[1] }}</a></td> <!-- Link to full ticket details -->
+                    <td>{{ ticket[2] }}</td>
+                    <td>{{ ticket[3] }}</td>
+                    <td>{{ ticket[4] }}</td>
+                    <td>
+                        <form method="POST" action="/update_ticket">
+                            <input type="hidden" name="ticket_id" value="{{ ticket[0] }}">
+                            <select name="status" class="form-control">
+                                <option value="Open" {% if ticket[3] == 'Open' %}selected{% endif %}>Open</option>
+                                <option value="In Progress" {% if ticket[3] == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                <option value="Resolved" {% if ticket[3] == 'Resolved' %}selected{% endif %}>Resolved</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary mt-2">Update</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+                    </table>
+    </div>
+</body>
+</html>
